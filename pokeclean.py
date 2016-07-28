@@ -192,7 +192,7 @@ def get_pos_by_name(location_name):
         possibleCoordinates = re.findall("[-]?\d{1,3}[.]\d{6,7}", location_name)
         if len(possibleCoordinates) == 2:
             # 2 matches, this must be a coordinate. We'll bypass the Google geocode so we keep the exact location.
-            logger.log(
+            log.info(
                 '[x] Coordinates found in passed in location, not geocoding.')
             return (float(possibleCoordinates[0]), float(possibleCoordinates[1]), float("0.0"))
 
