@@ -1,8 +1,8 @@
 {
-	"always_keep":[
+	"always_keep": [
+		"Exeggcute",
 		"Arcanine",
 		"Lapras",
-		"Dratini",
 		"Dragonite",
 		"Dragonair",
 		"Snorlax",
@@ -12,5 +12,11 @@
 		"Zapdos",
 		"Mew",
 		"Mewtwo"
-	]
+		],
+
+	"always_transfer": [
+		"Venonat",
+		"Omanyte",
+		"Tangela"
+		]
 }

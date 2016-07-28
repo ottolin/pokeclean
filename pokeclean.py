@@ -57,15 +57,16 @@ def init_config():
 
     # Read passed in Arguments
     required = lambda x: not x in load
-    parser.add_argument("-a", "--auth_service", help="Auth Service ('ptc' or 'google')",
-        required=required("auth_service"))
+    parser.add_argument("-a", "--auth_service", help="Auth Service ('ptc' or 'google')", required=required("auth_service"))
     parser.add_argument("-u", "--username", help="Username", required=required("username"))
     parser.add_argument("-p", "--password", help="Password")
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
     parser.add_argument("-t", "--test", help="Only parse the specified location", action='store_true')
-    parser.set_defaults(DEBUG=False, TEST=False)
+    parser.add_argument("-s", "--show", help="Only show dry run result. Not deleting actually", action='store_true')
+    parser.set_defaults(DEBUG=False, TEST=False, SHOW=False)
     config = parser.parse_args()
+
 
     # Passed in arguments shoud trump
     for key in config.__dict__:
@@ -82,7 +83,7 @@ def init_config():
 
     return config
 
-def transfer_mon(api, response_dict):
+def transfer_mon(api, response_dict, config):
     try:
         reduce(dict.__getitem__, ["responses", "GET_INVENTORY", "inventory_delta", "inventory_items"], response_dict)
     except KeyError:
@@ -116,19 +117,22 @@ def transfer_mon(api, response_dict):
                 att = pokemon['individual_attack']
                 defe = pokemon['individual_defense']
                 stm = pokemon['individual_stamina']
+                cp = pokemon['cp']
+		favorite = pokemon.get('favorite', False)
                 release = False
-                if ind_low or (pokemon_potential < 0.3):
+                if ind_low or (pokemon_potential < 0.8) or pokemon_name in pokemon_safe_list['always_transfer']:
                     release = True
 
-                if pokemon_name in pokemon_safe_list['always_keep']:
+                if pokemon_name in pokemon_safe_list['always_keep'] or favorite:
                     log.info("{} is in safe list!".format(pokemon_name))
                     release = False
 
                 if release:
-                    log.info("*** Releasing {} ({}/{}/{} IV: {}) ***".format(pokemon_name, att, defe, stm, pokemon_potential))
-                    do_transfer(api, pokemon)
+                    log.info("*** Releasing {} ({}/{}/{} CP: {} IV: {}) ***".format(pokemon_name, att, defe, stm, cp, pokemon_potential))
+                    if not config.show:
+                        do_transfer(api, pokemon)
                 else:
-                    log.info("Keeping {} ({}/{}/{} IV: {})".format(pokemon_name, att, defe, stm, pokemon_potential))
+                    log.info("Keeping {} ({}/{}/{} CP: {} IV: {})".format(pokemon_name, att, defe, stm, cp, pokemon_potential))
 
 def do_transfer(api, mon):
     api.release_pokemon(pokemon_id=mon['id'])
@@ -251,7 +255,7 @@ def main():
     log.info("Before cleanup:")
     response_dict = api.call()
     info_resp(response_dict)
-    transfer_mon(api, response_dict)
+    transfer_mon(api, response_dict, config)
 
     log.info("After cleanup:")
     api.get_inventory()
