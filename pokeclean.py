@@ -41,8 +41,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 # import Pokemon Go API lib
 from pgoapi import PGoApi
 
-pokemon_list = json.load(open('data/pokemon.json'))
-pokemon_safe_list = json.load(open('data/keep.json'))
+pokemon_list = json.load(open(os.path.join(os.path.dirname(__file__), 'data/pokemon.json')))
+pokemon_safe_list = json.load(open(os.path.join(os.path.dirname(__file__), 'data/keep.json')))
 log = logging.getLogger(__name__)
 
 def init_config():
